@@ -14,7 +14,7 @@ function AuthContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isSignUp = searchParams.get("signup") === "true";
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,34 +27,48 @@ function AuthContent() {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          }
+        // Use server-side admin API to create user with confirmed email
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
-        if (error) throw error;
-        toast.success("Compte créé ! Vérifiez vos emails.");
+        const data = await res.json();
+
+        // 409 = account already exists, just sign in directly
+        if (!res.ok && res.status !== 409) {
+          throw new Error(data.error || "Erreur lors de la création du compte");
+        }
+
+        // Sign in immediately (works for new and existing accounts)
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+
+        toast.success(res.status === 409 ? "Connexion réussie !" : "Compte créé ! Connexion en cours...");
+        // Full page reload so middleware sees the new session cookie
+        window.location.href = "/dashboard";
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Connexion réussie !");
-        router.push("/dashboard");
+        // Full page reload so middleware sees the new session cookie
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
-      toast.error(error.message || "Une erreur est survenue");
-    } finally {
+      const msg = error.message || "Une erreur est survenue";
+      if (msg.includes("Invalid login credentials") || msg.includes("invalid_credentials")) {
+        toast.error("Email ou mot de passe incorrect");
+      } else if (msg.includes("Email not confirmed")) {
+        toast.error("Email non confirmé. Contactez le support.");
+      } else {
+        toast.error(msg);
+      }
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-[#0A0A0A] relative overflow-hidden">
-      {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-wa-green/10 blur-[100px] pointer-events-none" />
 
       <Card className="w-full max-w-md relative z-10 p-8">
@@ -73,17 +87,18 @@ function AuthContent() {
             <label className="text-sm font-medium">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <Input 
-                type="email" 
-                required 
-                className="pl-10" 
+              <Input
+                type="email"
+                required
+                autoComplete="email"
+                className="pl-10"
                 placeholder="vous@entreprise.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Mot de passe</label>
@@ -95,20 +110,24 @@ function AuthContent() {
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <Input 
-                type="password" 
-                required 
-                className="pl-10" 
+              <Input
+                type="password"
+                required
+                autoComplete={isSignUp ? "new-password" : "current-password"}
+                className="pl-10"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            {isSignUp && (
+              <p className="text-xs text-gray-400">Minimum 6 caractères</p>
+            )}
           </div>
 
-          <Button 
-            type="submit" 
-            variant="wa" 
+          <Button
+            type="submit"
+            variant="wa"
             className="w-full mt-6"
             disabled={loading}
           >
@@ -116,7 +135,7 @@ function AuthContent() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {isSignUp ? "S'inscrire" : "Se connecter"}
+                {isSignUp ? "Créer mon compte" : "Se connecter"}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </>
             )}
@@ -124,9 +143,9 @@ function AuthContent() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          {isSignUp ? "Déjà un compte ?" : "Pas encore de compte ?"} {" "}
-          <Link 
-            href={isSignUp ? "/login" : "/login?signup=true"} 
+          {isSignUp ? "Déjà un compte ?" : "Pas encore de compte ?"}{" "}
+          <Link
+            href={isSignUp ? "/login" : "/login?signup=true"}
             className="text-wa-green hover:underline font-medium"
           >
             {isSignUp ? "Se connecter" : "Créer un compte"}
@@ -139,8 +158,14 @@ function AuthContent() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center"><Loader2 className="w-8 h-8 text-wa-green animate-spin" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-wa-green animate-spin" />
+        </div>
+      }
+    >
       <AuthContent />
     </Suspense>
-  )
+  );
 }
