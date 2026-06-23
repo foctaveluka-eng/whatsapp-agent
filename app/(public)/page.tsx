@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, Bot, MessageSquare, Zap, Shield, Coffee } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, Bot, Zap, Shield, Coffee } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -36,12 +35,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4 pt-20 pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto space-y-8"
-        >
+        <div className="max-w-4xl mx-auto space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-wa-green/10 text-wa-green border border-wa-green/20 text-sm font-medium mb-4">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-wa-green opacity-75"></span>
@@ -49,12 +43,12 @@ export default function LandingPage() {
             </span>
             L'outil IA n°1 pour WhatsApp
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
             Automatisez <span className="wa-gradient-text">votre WhatsApp</span><br />
             avec l'Intelligence Artificielle
           </h1>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Créez des assistants virtuels puissants. Qualifiez vos leads, répondez au support client et prenez des rendez-vous automatiquement 24h/24.
           </p>
@@ -73,13 +67,55 @@ export default function LandingPage() {
               </Button>
             </Link>
           </div>
-          
+
           <div className="flex items-center justify-center gap-8 text-sm text-gray-500 pt-8">
             <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-wa-green" /> Sans carte bancaire</div>
             <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-wa-green" /> Setup en 5 minutes</div>
           </div>
-        </motion.div>
+        </div>
       </main>
+
+      {/* Features Section */}
+      <section id="features" className="py-24 px-4 border-t border-gray-100 dark:border-white/5">
+        <div className="max-w-5xl mx-auto text-center mb-16">
+          <h2 className="text-3xl font-bold mb-4">Tout ce dont vous avez besoin</h2>
+          <p className="text-gray-500 dark:text-gray-400">Une plateforme complète pour automatiser votre WhatsApp Business.</p>
+        </div>
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { icon: "🤖", title: "Agents IA", desc: "Créez des assistants virtuels qui répondent automatiquement à vos clients 24h/24." },
+            { icon: "📊", title: "CRM Intégré", desc: "Gérez vos leads et suivez vos conversations directement depuis le tableau de bord." },
+            { icon: "⚡", title: "Réponses instantanées", desc: "Vos clients reçoivent une réponse en moins de 2 secondes, à toute heure." },
+          ].map((f) => (
+            <div key={f.title} className="p-6 rounded-2xl border border-gray-100 dark:border-white/5 bg-white dark:bg-white/[0.02] text-left">
+              <span className="text-3xl mb-4 block">{f.icon}</span>
+              <h3 className="font-bold text-lg mb-2">{f.title}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 px-4 border-t border-gray-100 dark:border-white/5">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Tarifs simples et transparents</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-12">Commencez gratuitement, évoluez selon vos besoins.</p>
+          <div className="p-8 rounded-2xl border-2 border-wa-green bg-wa-green/5">
+            <div className="text-5xl font-extrabold mb-2">Gratuit</div>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">Pour commencer dès aujourd'hui</p>
+            <Link href="/login?signup=true">
+              <Button variant="wa" size="lg" className="w-full shadow-neon">
+                Créer un compte gratuit
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 border-t border-gray-100 dark:border-white/5 text-center text-sm text-gray-400">
+        © 2026 WhatsAppAgent. Tous droits réservés.
+      </footer>
     </div>
   );
 }

@@ -5,7 +5,6 @@ const nextConfig = {
       { protocol: 'https', hostname: '**' },
     ],
   },
-  allowedDevOrigins: ['*.replit.dev', '*.kirk.replit.dev', '*.repl.co'],
 }
 
 module.exports = nextConfig
