@@ -680,6 +680,12 @@ video {
 .mb-1 {
   margin-bottom: 0.25rem;
 }
+.mb-12 {
+  margin-bottom: 3rem;
+}
+.mb-16 {
+  margin-bottom: 4rem;
+}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -712,12 +718,6 @@ video {
 }
 .mt-auto {
   margin-top: auto;
-}
-.mb-12 {
-  margin-bottom: 3rem;
-}
-.mb-16 {
-  margin-bottom: 4rem;
 }
 .line-clamp-2 {
   overflow: hidden;
@@ -869,6 +869,9 @@ video {
 .max-w-4xl {
   max-width: 56rem;
 }
+.max-w-5xl {
+  max-width: 64rem;
+}
 .max-w-7xl {
   max-width: 80rem;
 }
@@ -883,9 +886,6 @@ video {
 }
 .max-w-sm {
   max-width: 24rem;
-}
-.max-w-5xl {
-  max-width: 64rem;
 }
 .flex-1 {
   flex: 1 1 0%;
@@ -1086,15 +1086,15 @@ video {
 .border-transparent {
   border-color: transparent;
 }
+.border-wa-green {
+  --tw-border-opacity: 1;
+  border-color: rgb(37 211 102 / var(--tw-border-opacity, 1));
+}
 .border-wa-green\/20 {
   border-color: rgb(37 211 102 / 0.2);
 }
 .border-white\/10 {
   border-color: rgb(255 255 255 / 0.1);
-}
-.border-wa-green {
-  --tw-border-opacity: 1;
-  border-color: rgb(37 211 102 / var(--tw-border-opacity, 1));
 }
 .bg-\[\#0A0A0A\] {
   --tw-bg-opacity: 1;
@@ -1169,6 +1169,9 @@ video {
 .bg-wa-green\/20 {
   background-color: rgb(37 211 102 / 0.2);
 }
+.bg-wa-green\/5 {
+  background-color: rgb(37 211 102 / 0.05);
+}
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
@@ -1185,9 +1188,6 @@ video {
 .bg-yellow-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
-}
-.bg-wa-green\/5 {
-  background-color: rgb(37 211 102 / 0.05);
 }
 .bg-opacity-20 {
   --tw-bg-opacity: 0.2;
@@ -1286,6 +1286,10 @@ video {
   padding-top: 5rem;
   padding-bottom: 5rem;
 }
+.py-24 {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
@@ -1293,10 +1297,6 @@ video {
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
-}
-.py-24 {
-  padding-top: 6rem;
-  padding-bottom: 6rem;
 }
 .py-8 {
   padding-top: 2rem;
@@ -1771,11 +1771,11 @@ body {
 .dark\:bg-white\/5:is(.dark *) {
   background-color: rgb(255 255 255 / 0.05);
 }
-.dark\:bg-yellow-500\/10:is(.dark *) {
-  background-color: rgb(234 179 8 / 0.1);
-}
 .dark\:bg-white\/\[0\.02\]:is(.dark *) {
   background-color: rgb(255 255 255 / 0.02);
+}
+.dark\:bg-yellow-500\/10:is(.dark *) {
+  background-color: rgb(234 179 8 / 0.1);
 }
 .dark\:bg-opacity-20:is(.dark *) {
   --tw-bg-opacity: 0.2;
