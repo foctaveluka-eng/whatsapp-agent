@@ -1,24 +1,37 @@
+"use client";
+
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Download, Filter, Search, Users } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
-import { cookies } from "next/headers";
+import { Download, Filter, Search, Users, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export default async function LeadsPage() {
-  const cookieStore = cookies();
-  const supabase = createServerClient();
-  const { data: { session } } = await supabase.auth.getSession();
+export default function LeadsPage() {
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-  if (!session) {
-    return <div>Non autorisé</div>;
-  }
+  useEffect(() => {
+    fetch("/api/leads")
+      .then(r => r.json())
+      .then(data => { setLeads(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
-  const { data: leads } = await supabase
-    .from("leads")
-    .select("*, agents(name)")
-    .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false });
+  const filtered = leads.filter(l =>
+    l.name?.toLowerCase().includes(search.toLowerCase()) ||
+    l.phone?.includes(search)
+  );
+
+  const exportCSV = () => {
+    const rows = [["Nom", "Téléphone", "Agent", "Statut", "Date"]];
+    leads.forEach(l => rows.push([l.name, l.phone, l.agents?.name || "-", l.status, new Date(l.created_at).toLocaleDateString()]));
+    const csv = rows.map(r => r.join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "leads.csv";
+    a.click();
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -27,7 +40,7 @@ export default async function LeadsPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-1">Leads (CRM)</h1>
           <p className="text-gray-500 dark:text-gray-400">Gérez les contacts générés par vos agents.</p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={exportCSV}>
           <Download className="w-4 h-4" />
           Exporter CSV
         </Button>
@@ -37,14 +50,20 @@ export default async function LeadsPage() {
         <div className="p-4 border-b border-gray-100 dark:border-white/5 flex gap-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input placeholder="Rechercher un lead..." className="pl-9 h-9" />
+            <Input
+              placeholder="Rechercher un lead..."
+              className="pl-9 h-9"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
-          <Button variant="outline" className="h-9 gap-2">
-            <Filter className="w-4 h-4" /> Filtres
-          </Button>
         </div>
-        
-        {!leads || leads.length === 0 ? (
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-wa-green" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-medium mb-2">Aucun lead pour le moment</h3>
@@ -63,7 +82,7 @@ export default async function LeadsPage() {
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead: any) => (
+                {filtered.map((lead: any) => (
                   <tr key={lead.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5">
                     <td className="px-6 py-4 font-medium">{lead.name}</td>
                     <td className="px-6 py-4 text-gray-500">{lead.phone}</td>

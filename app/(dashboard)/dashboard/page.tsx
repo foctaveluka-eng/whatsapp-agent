@@ -1,40 +1,24 @@
 import { Card } from "@/components/ui/Card";
 import { Bot, Users, ArrowUpRight, MessageSquare, ShoppingBag } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
-import { cookies } from "next/headers";
-// Import dynamic for recharts if needed in a client component, 
-// but since the chart is complex, let's extract it to a client component
+import { createServerClient } from "@/lib/supabase-server";
+import { redirect } from "next/navigation";
 import DashboardChart from "./DashboardChart";
 
 export default async function DashboardPage() {
-  const cookieStore = cookies();
   const supabase = createServerClient();
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) {
-    return <div>Non autorisé</div>;
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
   }
 
-  // Fetch real stats
-  const { count: agentsCount } = await supabase
-    .from("agents")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", session.user.id);
-
-  const { count: leadsCount } = await supabase
-    .from("leads")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", session.user.id);
-
-  const { count: ordersCount } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", session.user.id)
-    .gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString());
-
-  // Activity list (empty for now)
-  const activities: any[] = [];
+  const [{ count: agentsCount }, { count: leadsCount }, { count: ordersCount }] = await Promise.all([
+    supabase.from("agents").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("orders").select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+  ]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -45,7 +29,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
@@ -54,7 +37,7 @@ export default async function DashboardPage() {
           </div>
           <div className="text-3xl font-bold">{agentsCount || 0}</div>
         </Card>
-        
+
         <Card className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
             <span className="text-sm font-medium">Total Leads</span>
@@ -85,7 +68,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Charts & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="col-span-1 lg:col-span-2">
           <h2 className="text-lg font-semibold mb-4">Évolution des Leads (7 derniers jours)</h2>
@@ -96,21 +78,7 @@ export default async function DashboardPage() {
 
         <Card>
           <h2 className="text-lg font-semibold mb-4">Activité récente</h2>
-          <div className="space-y-4">
-            {activities.length === 0 ? (
-              <p className="text-sm text-gray-500">Aucune activité récente pour le moment.</p>
-            ) : (
-              activities.map((act, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-wa-green mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">Action</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Détails</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <p className="text-sm text-gray-500">Aucune activité récente pour le moment.</p>
         </Card>
       </div>
     </div>
